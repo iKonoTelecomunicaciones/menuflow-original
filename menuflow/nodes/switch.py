@@ -29,7 +29,17 @@ class Switch(Base):
 
     @property
     def validation_attempts(self) -> int | None:
-        return self.content.get("validation_attempts", None)
+        if not self.content.get("validation_fail"):
+            return
+
+        return self.content.get("validation_fail").get("attempts")
+
+    @property
+    def validation_fail_message(self) -> str:
+        if not self.content.get("validation_fail"):
+            return
+
+        return self.content.get("validation_fail").get("message")
 
     @property
     def cases(self) -> List[Dict]:

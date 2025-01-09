@@ -18,7 +18,7 @@ from mautrix.types import (
 
 from .config import Config
 from .db.route import RouteState
-from .nodes import Base, GPTAssistant, Input, InteractiveInput
+from .nodes import Base, FormInput, GPTAssistant, Input, InteractiveInput
 from .room import Room
 from .user import User
 from .utils import Util
@@ -243,7 +243,7 @@ class MatrixHandler(MatrixClient):
 
         self.log.debug(f"The [room: {room.room_id}] [node: {node.id}] [state: {room.route.state}]")
 
-        if type(node) in (Input, InteractiveInput, GPTAssistant):
+        if type(node) in (Input, InteractiveInput, GPTAssistant, FormInput):
             await node.run(evt=evt)
             if room.route.state == RouteState.INPUT:
                 return

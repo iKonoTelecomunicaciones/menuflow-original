@@ -1,6 +1,7 @@
 from .check_time import CheckTime
 from .delay import Delay
 from .email import Email
+from .form import Form, FormMessage, FormMessageContent
 from .gpt_assistant import GPTAssistant
 from .http_request import HTTPRequest
 from .input import InactivityOptions, Input
