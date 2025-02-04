@@ -59,6 +59,14 @@ class Flow:
         self.nodes: List[Dict] = []
         self.nodes_by_id: Dict[str, Dict] = {}
 
+    @property
+    def flow_variables(self) -> Dict:
+        return {"flow": self.data.flow_variables or {}}
+
+    @classmethod
+    def init_cls(cls, flow_utils: FlowUtils) -> None:
+        cls.flow_utils = flow_utils
+
     async def load_flow(
         self,
         flow_mxid: Optional[str] = None,
@@ -74,14 +82,6 @@ class Flow:
 
     def _add_node_to_cache(self, node_data: Dict):
         self.nodes_by_id[node_data.get("id")] = node_data
-
-    @property
-    def flow_variables(self) -> Dict:
-        return {"flow": self.data.flow_variables or {}}
-
-    @classmethod
-    def init_cls(cls, flow_utils: FlowUtils) -> None:
-        cls.flow_utils = flow_utils
 
     def get_node_by_id(self, node_id: str) -> Dict | None:
         """This function returns a node from a cache or a list of nodes based on its ID.

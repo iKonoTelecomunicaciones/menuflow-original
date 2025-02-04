@@ -28,7 +28,7 @@ components:
         detail:
           type: object
       example:
-        :wqvalue:
+        value:
           detail:
             message: Flow created successfully.
             data:
@@ -277,6 +277,38 @@ components:
       example:
         detail:
           message: Invalid action provided.
+
+    GetAllBackupsOk:
+      type: object
+      properties:
+        flows:
+          type: array
+      example:
+        flows:
+          - id: 1
+            flow_id: 1
+            flow:
+              menu:
+                flow_variables:
+                  variable_1: value_1
+                  variable_2: value_2
+                nodes:
+                  - id: message_1
+                    type: message
+                    message: message_1
+                    o_connection: message_2
+          - id: 2
+            flow_id: 1
+            flow:
+              menu:
+                flow_variables:
+                  variable_1: value_1
+                  variable_2: value_2
+                nodes:
+                  - id: message_1
+                    type: message
+                    message: message_1
+                    o_connection: message_2
 
   responses:
     GetEmailServersSuccess:
@@ -535,3 +567,17 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ClientNotFound"
+
+    GetFlowBackupsSuccess:
+      description: Get flow backups success.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetAllBackupsOk"
+
+    GetFlowBackupsNotFound:
+      description: Get flow backups not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/FlowNotFound"

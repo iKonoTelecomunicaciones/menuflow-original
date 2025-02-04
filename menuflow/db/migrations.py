@@ -91,3 +91,15 @@ async def upgrade_v4(conn: Connection) -> None:
 @upgrade_table.register(description="Add enable column to client table")
 async def upgrade_v5(conn: Connection) -> None:
     await conn.execute("ALTER TABLE client ADD COLUMN enabled BOOLEAN NOT NULL DEFAULT TRUE")
+
+
+@upgrade_table.register(description="Add new table flow_backup")
+async def upgrade_v6(conn: Connection) -> None:
+    await conn.execute(
+        """CREATE TABLE flow_backup (
+            id          SERIAL PRIMARY KEY,
+            flow_id     INT NOT NULL,
+            flow        JSONB DEFAULT '{}'::jsonb NOT NULL,
+            created_at  TIMESTAMP  WITH TIME ZONE DEFAULT now()
+        )"""
+    )

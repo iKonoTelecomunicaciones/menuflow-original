@@ -47,6 +47,9 @@ menuflow:
     regex:
         room_id: ^![\w-]+:[\w.-]+$
 
+    # Limit of backups to keep per flow
+    backup_limit: 10
+
 
 server:
     # The IP and port to listen to.
