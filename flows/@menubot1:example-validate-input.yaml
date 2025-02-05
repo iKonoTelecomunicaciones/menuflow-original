@@ -1,0 +1,105 @@
+menu:
+  nodes:
+    - id: start
+      type: input
+      text: |
+        Hola este es un menú de pruebas para usar diferentes maneras de validar opciones del menú.<br><br>
+        Por favor selecciona una opción:<br><br>
+
+        1. Validar con expresión regular
+        2. Validar con modelo sencillo
+        3. Validar con asistente
+
+      variable: opt
+      validation: "{{ route.opt }}"
+      cases:
+        - id: 1
+          o_connection: menu_regexp
+        - id: 2
+          o_connection: set_menu_options
+        - id: default
+          o_connection: start
+
+    - id: menu_regexp
+      type: input
+      text: |
+        Has seleccionado la opción de validar con expresión regular.<br><br>
+        Por favor selecciona una de las siguientes opciones:<br><br>
+
+        1. Citas odontológicas
+        2. Citas médicina general
+        3. Citas laboratorio
+        4. Reclamar medicamentos
+        0. Volver al menú principal
+
+      variable: opt
+      cases:
+        - case: "{%- set aux = route.opt | string -%}{{ match('odontologia|odontología|1|1. Citas odontológicas|muela|diente', aux) }}"
+          o_connection: odontologia
+        - case: "{%- set aux = route.opt | string -%}{{ match('medicina general|medicina|2|2. Citas médicina general|medico|doctor', aux) }}"
+          o_connection: medicina
+        - case: "{%- set aux = route.opt | string -%}{{ match('laboratorio|3|3. Citas laboratorio|examen|prueba', aux) }}"
+          o_connection: laboratorio
+        - case: "{%- set aux = route.opt | string -%}{{ match('reclamar medicamentos|medicamentos|4|4. Reclamar medicamentos|medicina|farmacia', aux) }}"
+          o_connection: medicamentos
+        - case: "{%- set aux = route.opt | string -%}{{ match('volver|regresar|atras|back|0', aux) }}"
+          o_connection: start
+        - id: default
+          o_connection: menu_regexp
+
+    - id: odontologia
+      type: message
+      text: Has seleccionado la opción de citas odontológicas.
+
+    - id: medicina
+      type: message
+      text: Has seleccionado la opción de citas médicina general.
+
+    - id: laboratorio
+      type: message
+      text: Has seleccionado la opción de citas laboratorio.
+
+    - id: medicamentos
+      type: message
+      text: Has seleccionado la opción de reclamar medicamentos.
+
+    - id: set_menu_options
+      type: set_vars
+      variables:
+        set:
+          menu_options:  >
+            1. Citas odontológicas
+            2. Citas médicina general
+            3. Citas laboratorio
+            4. Reclamar medicamentos
+            0. Ir a la opción anterior
+      o_connection: menu_model
+
+    - id: menu_model
+      type: input
+      text: |
+        Has seleccionado la opción de validar con modelo sencillo.<br><br>
+        Por favor selecciona una de las siguientes opciones:<br><br>
+
+        1. Citas odontológicas
+        2. Citas médicina general
+        3. Citas laboratorio
+        4. Reclamar medicamentos
+        0. Ir a la opción anterior
+      validation: "{{ route.opt }}"
+      middlewares:
+        - llm_middleware_menu
+      input_type: 'm.text'
+      cases:
+        - id: 1
+          o_connection: odontologia
+        - id: 2
+          o_connection: medicina
+        - id: 3
+          o_connection: laboratorio
+        - id: 4
+          o_connection: medicamentos
+        - id: 0
+          o_connection: start
+        - id: default
+          o_connection: 'farewell_message'

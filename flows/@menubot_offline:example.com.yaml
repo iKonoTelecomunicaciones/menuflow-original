@@ -1,0 +1,137 @@
+menu:
+  flow_variables:
+    acd:
+      endpoints:
+        transfer: "http://acd-as:29601/provision/v2/cmd/transfer"
+        remove_user: "http://acd-as:29601/provision/v1/remove_user"
+
+  nodes:
+    - id: "start"
+      type: "check_time"
+      timezone: "America/Bogota"
+      time_ranges:
+        - "08:00-12:00"
+        - "14:00-18:00"
+      days_of_week:
+        - "mon-fri"
+      days_of_month:
+        - "*"
+      months:
+        - "*"
+      cases:
+        - id: "True"
+          o_connection: "main_menu"
+        - id: "False"
+          o_connection: "business_hour"
+          variables:
+            leave_reason: "business hour"
+
+    - id: "main_menu"
+      type: "input"
+      text: >
+        Puedes esperar hasta que {{ route.external.agent_name }} esté disponible o enviar:<br><br>
+
+        <b>1.</b> Transferir a un agente de la misma área<br>
+        <b>2.</b> Ir al menú principal<br>
+        <b>3.</b> Esperar que el agente esté disponible.<br>
+
+      variable: "route.opt"
+      validation: "{{ route.opt }}"
+      cases:
+        - id: "1"
+          o_connection: "http_transfer"
+        - id: "2"
+          o_connection: "remove_user"
+        - id: "3"
+          o_connection: "leave"
+          variables:
+            leave_reason: "Usuario seleccionó opción de esperar el agente"
+        - id: "default"
+          o_connection: "invalid_option"
+
+    - id: "http_transfer"
+      type: "http_request"
+      method: POST
+      url: "{{ flow.acd.endpoints.transfer }}"
+      middleware: "acd"
+      json:
+        customer_room_id: "{{ route.customer_room_id }}"
+        destination: "{{ route.external.last_selected_queue }}"
+      cases:
+        - id: 200
+          o_connection: "empty_message"
+        - id: 404
+          o_connection: "no_agents"
+        - id: "default"
+          o_connection: "error_acd"
+
+    - id: "error_acd"
+      type: "message"
+      message_type: "m.text"
+      text: "Error al ejecutar acciones en el ACD, por favor intenta nuevamente."
+
+    - id: "empty_message"
+      type: "message"
+      message_type: "m.text"
+      text: ""
+
+    - id: "invalid_option"
+      type: "message"
+      message_type: "m.text"
+      text: "La opción ingresada no es válida, por favor intenta nuevamente."
+      o_connection: "main_menu"
+
+    - id: "no_agents"
+      type: "message"
+      message_type: "m.text"
+      text: "No hay agentes disponibles"
+
+    - id: "business_hour"
+      type: "message"
+      message_type: "m.text"
+      text: |
+        🙂 Hola! Te informamos que nuestro horario de atención por este medio es de **lunes a viernes de 8am a 12m y de 2pm a 6pm.⏱️ ** <br><br>
+      o_connection: "leave"
+
+    - id: "leave"
+      type: "leave"
+      reason: "{{ route.leave_reason  }}"
+
+    - id: "remove_user"
+      type: "http_request"
+      method: POST
+      url: "{{ flow.acd.endpoints.remove_user }}"
+      middleware: "acd"
+      json:
+        room_id: "{{ route.customer_room_id }}"
+        user_id: "{{ route.external.current_agent }}"
+        reason: "Removed by menu, user is offline"
+      cases:
+        - id: 200
+          o_connection: "invite_user"
+        - id: "default"
+          o_connection: "error_acd"
+
+    - id: "invite_user"
+      type: "invite_user"
+      invitee: "{{ route.external.main_menu }}"
+      timeout: 100
+      cases:
+        - id: "join"
+          o_connection: "leave"
+          variables:
+            leave_reason: "Inviting main menu"
+        - id: "reject"
+          o_connection: "error_invite_user"
+        - id: "timeout"
+          o_connection: "timeout_invite_user"
+
+    - id: "timeout_invite_user"
+      type: "message"
+      message_type: "m.text"
+      text: "El usuario no se encuentra disponible, por favor intenta nuevamente."
+
+    - id: "error_invite_user"
+      type: "message"
+      message_type: "m.text"
+      text: "User rejected the invite."

@@ -1,0 +1,703 @@
+menu:
+
+    flow_variables:
+      image_test: https://concepto.de/wp-content/uploads/2015/03/paisaje-e1549600034372.jpg
+      audio_test: https://transfer.sh/3rJt5XWWU6/example_audio.mp3
+      video_test: https://transfer.sh/dnn0a1wb1M/example_video.mp4
+      file_test:  https://www.turnerlibros.com/wp-content/uploads/2021/02/ejemplo.pdf
+
+      api_superredes:
+        base_url: "https://api.srnetworks.co/api/chatbot"
+        base_radius: "http://superredes.ozmap.com.br:9090/api/v2/ftth-viability/radius"
+        auth_radius: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2R1bGUiOiJhcGkiLCJ1c2VyIjoiNjM0OTcxNzA2ZDEzMTEwMDIwNGFiNDIwIiwiY3JlYXRpb25EYXRlIjoiMjAyNC0wNy0xNlQyMTowNDowMi40NDJaIiwiaWF0IjoxNzIxMTYzODQyfQ.iDhEc_bNE6u5cXCF2hvKPKp0_XlGSXSmO5RKYE5arh4"
+      endpoints:
+        getCliente: "/nombre-completo-cliente"
+        getContratos: "/listado-contratos-activos"
+        getSaldoPendiente: "/saldo-pendiente-contrato"
+        send_email: "/enviar-factura-correo"
+        getNumeroFacturas: "/cantidad-facturas-abieras-contrato"
+        getTipoContrato: "/tipo-proyecto-contrato"
+        getNacimiento: "/fecha-nacimiento-cliente"
+        getEmail: "/email-persona"
+        getEstado_contratos: "/estado-contrato"
+        getTelefono: "/telefono-contacto-cliente"
+        post_acuerdo: "/crear-acuerdo-pago"
+        getEstado_servicio: "/estado-servicio"
+        getSuspencion_temporal: "/validacion-suspension-temporal"
+        postCrear_suspension_temporal: "/crear-suspension-temporal"
+        activar_servicios: "/activar-servicio"
+
+      extra1: "7e38512686841a7a3ffa3285b8a522af"
+      sign: "728ac03ad04920e536e7f509a46547f86f4ddab7"
+
+      variable_1:
+        name: "variable_1"
+        value: "value_1"
+
+      #cedula: "1022946029"
+      cedula: "1022946027"
+      campana: "202406"
+      empresa: "2"
+
+    nodes:
+
+      - id: start
+        type: input
+        text: |
+          This is our node display menu, select one of our options to see how it works.
+
+          **1.** Send text message ✏️
+          **2.** Send image 🖼️
+          **3.** Send audio 🎙️
+          **4.** Send video 📹️
+          **5.** Send file 📰
+          **6.** Send location 🗺️
+          **7.** Send Email ✉️
+          **8.** Send HTTP request
+          **9.** Translate
+          **10.** Large Language Model
+          **11.** Speech to Text
+          **12.** Recognize audio with llm
+          **13.** Validate normal
+          **14.** Validate case by case
+          **15.** Subroutine
+          **16.** Get information with basic auth
+          **17.** Set variables
+          **18.** Checksubroutine
+          **19.** Assistant
+          **20.** Get location data
+          **21.** Resta de fechas
+          **22.** Ir a sala
+          **23.** Enviar imagen con base64
+          **24.** Petición con jinja
+          **25.** Enviar formulario
+          **26.** Finish
+
+        variable: opt
+        validation: "{{ route.opt }}"
+        cases:
+          - id: 1
+            o_connection: message-node
+          - id: 2
+            o_connection: media-node
+            variables:
+              message_type: "m.image"
+              file: "{{ flow.image_test }}"
+          - id: 3
+            o_connection: media-node
+            variables:
+              message_type: "m.audio"
+              file: "{{ flow.audio_test }}"
+          - id: 4
+            o_connection: media-node
+            variables:
+              message_type: "m.video"
+              file: "{{ flow.video_test }}"
+          - id: 5
+            o_connection: media-node
+            variables:
+              message_type: "m.file"
+              file: "{{ flow.file_test }}"
+          - id: 6
+            o_connection: location-node
+          - id: 7
+            o_connection: get_email
+          - id: 8
+            o_connection: "send_http"
+          - id: 9
+            o_connection: "translate"
+          - id: 10
+            o_connection: "get_date"
+          - id: 11
+            o_connection: "recognize_audio"
+          - id: 12
+            o_connection: get_date_v2
+          - id: 13
+            o_connection: switch_normal
+          - id: 14
+            o_connection: sub_prueba_rec
+          - id: 15
+            o_connection: sub1
+          - id: 16
+            o_connection: basic_request
+          - id: 17
+            o_connection: get_user_text
+          - id: 18
+            o_connection: check_subroutine
+          - id: 19
+            o_connection: calification_assistant
+          - id: 20
+            o_connection: location_node_input
+          - id: 21
+            o_connection: get_date_v3
+          - id: 22
+            o_connection: http_acd
+            variables:
+              joined_message: "Hola mucho gusto, nos encanta ayudarte \n \n ¿En qué podemos ayudarte hoy?"
+          - id: 23
+            o_connection: check_media
+            variables:
+              message_type: "m.file"
+              file: "https://wcftpqa.marketingpersonal.com/WCFServices/TPService.svc/json/ConsultarResumenFactura?Cedula={{ flow.cedula }}&Campana={{ flow.campana }}&Empresa={{ flow.empresa }}"
+              #file: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQSkw2nEjil00Y_Vuw3j9JiDtAcjzol3Mfkw&s"
+          - id: 24
+            o_connection: set_jinja_variable
+          - id: 25
+            o_connection: 'send_form'
+          - id: 26
+            o_connection: finish
+          - id: default
+            o_connection: start
+          - id: timeout
+            o_connection: closing_message
+
+      - id: message-node
+        type: message
+        text: |
+          Para {{ route.external.name }} {{ route.external.last_name }}
+
+          In a few years, Macondo was a more orderly and industrious village
+          than any of those known up to that time by its three hundred inhabitants.
+          It was indeed a happy village,
+          where no one was older than thirty and where no one had died.
+          He saw a woman dressed in gold in the neck of an elephant.<br><br>
+          <b>Gabriel García Márquez<b>
+        o_connection: start
+
+      - id: check_media
+        type: http_request
+        method: 'GET'
+        url: "{{ route.file | safe }}"
+        variables:
+          content: 'data'
+        cases:
+          - id: default
+            o_connection: validate_media_content
+
+      - id: validate_media_content
+        type: switch
+        validation: "{% if route.content | length > 0 %}True{%endif%}"
+        cases:
+          - id: true
+            o_connection: media-node
+          - id: default
+            o_connection: farewell_message
+
+      - id: media-node
+        type: media
+        message_type: "{{ route.message_type }}"
+        text: "informacion-media"
+        url: "{{ route.file | safe }}"
+        o_connection: start
+
+      - id: location-node
+        type: location
+        longitude:  41.8902102
+        latitude: 12.4922309
+        o_connection: start
+
+      - id: get_email
+        type: input
+        variable: client_email
+        text: "Enter your email, we will use it to send you a test email 📧"
+        validation: "{{ match('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$', route.client_email) }}"
+        inactivity_options:
+          chat_timeout: 60
+          warning_message: 'Please enter a valid email or the chat will be closed due to inactivity 😱'
+          time_between_attempts: 30
+          attempts: 3
+        cases:
+          - id: true
+            o_connection: email-mode
+          - id: default
+            o_connection: farewell_message
+          - id: timeout
+            o_connection: closing_message
+
+      - id: email-mode
+        type: email
+        server_id: "smtp_egalvis"
+        subject: This is an example email sent by menuflow 📧
+        recipients:
+          - "{{ route.client_email }}"
+        attachments:
+          - "{{ flow.image_test }}"
+          - "{{ flow.file_test }}"
+        text: "You can send all that you want in the email body and put some attachments files"
+        format: "html"
+        encode_type: "utf-8"
+        o_connection: start
+
+      - id: 'send_http'
+        type: 'http_request'
+        method: 'GET'
+        url: 'https://api.imgflip.com/get_memes'
+        variables:
+          memes: 'data.memes'
+        cases:
+          - id: 200
+            o_connection: 'get_meme'
+          - id: default
+            o_connection: 'farewell_message'
+
+      - id: get_meme
+        type: switch
+        validation: "{% if route.memes %}True{%endif%}"
+        cases:
+          - id: true
+            variables:
+              meme_random: "{{ range(1,100)|random }}"
+            o_connection: "send_meme"
+          - id: default
+            o_connection: "farewell_message"
+
+      - id: send_meme
+        type: media
+        message_type: "m.image"
+        text: "{{ route.memes[route.meme_random].name }}"
+        url: "{{ route.memes[route.meme_random].url }}"
+        o_connection: start
+
+      - id: farewell_message
+        type: message
+        text: "Thank you for interacting. 😊"
+
+      - id: 'closing_message'
+        type: "message"
+        text: "The chat has been closed due to inactivity, thank you for reaching out to us. 😁"
+
+      - id: 'image_recognition'
+        type: 'input'
+        text: 'Send an image to recognize'
+        validation: "{{ route.invoice_number }}"
+        middleware: 'irm_middleware'
+        input_type: 'm.image'
+        cases:
+          - id: 101FV01F07652726
+            o_connection: 'invoice'
+          - id: default
+            o_connection: 'farewell_message'
+
+      - id: 'invoice'
+        type: 'message'
+        text: >
+          The invoice number is {{ route.invoice_number }}<br>
+          {%- for item in route.invoice_items -%}
+            <b>Item:</b> {{ item.description }}<br>
+            <b>Price:</b> {{ item.price_per_unit }}<br>
+            <b>Count:</b> {{ item.count }}<br>
+          {%- endfor -%}
+          <br>
+          The total is {{ route.total }}
+
+      - id: 'get_date'
+        type: 'input'
+        text: 'Send a time expression to get a date'
+        validation: "{{  match('^[0-3][0-9]/[0-3][0-9]/(?:[0-9][0-9])?[0-9][0-9]$', route.appointment_date) }}"
+        middlewares:
+          - llm_middleware
+          - ttm_middleware
+        input_type: 'm.text'
+        cases:
+          - id: True
+            o_connection: 'date'
+          - id: default
+            o_connection: 'farewell_message'
+
+      - id: 'date'
+        type: 'message'
+        text: 'The date is {{ route.appointment_date }}'
+        o_connection: 'farewell_message'
+
+      - id: translate
+        type: input
+        text: 'Send a text to translate'
+        validation: "{{ route.translated_text }}"
+        middleware: 'ttm_middleware'
+        input_type: 'm.text'
+        cases:
+          - id: one
+            o_connection: 'message_translated'
+          - id: two
+            o_connection: 'message_translated'
+          - id: three
+            o_connection: 'message_translated'
+          - id: default
+            o_connection: 'farewell_message'
+
+      - id: message_translated
+        type: message
+        text: "The translated {{ route.translated_text }}"
+
+      - id: 'get_date_v2'
+        type: 'input'
+        text: 'Send a time expression to get a date'
+        validation: "{{  match('^[0-3][0-9]/[0-3][0-9]/(?:[0-9][0-9])?[0-9][0-9]$', route.appointment_date) }}"
+        middlewares:
+          - tstt_middleware
+          - llm_middleware
+        input_type: 'm.audio'
+        cases:
+          - id: True
+            o_connection: 'date'
+          - id: default
+            o_connection: 'farewell_message'
+
+      - id: recognize_audio
+        type: input
+        text: 'Send an audio to recognize'
+        middlewares:
+          - tstt_middleware
+        input_type: 'm.audio'
+        cases:
+          - case: >
+              {%- if route.recogniced_text == 'Uno' or route.recogniced_text == 1 -%}
+                True
+              {%- else -%}
+                False
+              {%- endif -%}
+            o_connection: 'audio_recognized'
+          - case: >
+              {%- if route.recogniced_text == 'Dos' or route.recogniced_text == 2 -%}
+                True
+              {%- else -%}
+                False
+              {%- endif -%}
+            o_connection: 'audio_recognized'
+          - case: >
+              {%- if route.recogniced_text == 'Tres' or route.recogniced_text == 3 -%}
+                True
+              {%- else -%}
+                False
+              {%- endif -%}
+            o_connection: 'audio_recognized'
+          - case: >
+              {%- if route.recogniced_text != 1 -%}
+                True
+              {%- else -%}
+                False
+              {%- endif -%}
+            o_connection: 'audio_recognized'
+
+      - id: audio_recognized
+        type: message
+        text: "The recognized text is {{ route.recogniced_text }}"
+        o_connection: 'farewell_message'
+
+      - id: switch_normal
+        type: switch
+        validation: "{{ route.opt }}"
+        cases:
+          - id: 14
+            o_connection: 'new_message'
+            variables:
+              message: "Hi I am the option that is saving variables in the switch normal"
+          - id: default
+            o_connection: 'farewell_message'
+
+      - id: sub_prueba_rec
+        type: subroutine
+        go_sub: saldo_pendiente
+        o_connection: switch_case_by_case
+
+      - id: saldo_pendiente
+        type: 'http_request'
+        method: 'GET'
+        url: "{{flow.api_superredes.base_url}}{{flow.endpoints.getSaldoPendiente}}/7808/{{flow.extra1}}/{{flow.sign}}"
+        variables:
+          success_saldo: 'success'
+          valor_saldo_pendiente: 'data'
+        cases:
+          - id: 200
+            o_connection: finish
+          - id: default
+            o_connection: error_message
+
+      - id: switch_case_by_case
+        type: 'switch'
+        validation: '{% set aux = route.valor_saldo_pendiente | replace(".", "")%}{%if aux | int > 6000 %}True{%else%}False{% endif %}'
+        cases:
+          - id: 'True'
+            o_connection: new_message
+            variables:
+              message: "The value is greater than 6000"
+          - id: 'False'
+            o_connection: farewell_message
+          - id: 'default'
+            o_connection: farewell_message
+
+      - id: new_message
+        type: message
+        text: "{{ route.message }}"
+
+      - id: sub1
+        type: subroutine
+        go_sub: subroutine
+        o_connection: 'farewell_message'
+
+      - id: subroutine
+        type: message
+        text: "This is a subroutine message"
+        o_connection: 'http_request_subroutine'
+
+      - id: http_request_subroutine
+        type: http_request
+        method: 'GET'
+        url: 'https://api.imgflip.com/get_memes'
+        variables:
+          memes: 'data.memes'
+        cases:
+          - id: 200
+            o_connection: 'finish'
+          - id: default
+            o_connection: 'error_message'
+
+      - id: basic_request
+        type: http_request
+        method: 'GET'
+        url: 'http://190.248.146.155:8050/call/search?callerid_num=3104930107&call_type=incoming&limit=1'
+        basic_auth:
+          login: admin
+          password: "ooykmpgiWfwD82olpvsu"
+        variables:
+          queue: '[0].queuename'
+          uniqueid: '[0].uniqueid'
+        cases:
+          - id: 200
+            o_connection: 'send_call_info'
+          - id: default
+            o_connection: 'error_message'
+
+      - id: send_call_info
+        type: message
+        text: 'Hello {{ route.uniqueid }} your queuename is {{ route.queue }}'
+
+      - id: get_user_text
+        type: input
+        text: 'Send a text to save in a variable'
+        variable: client_text
+        validation: "{{ route.client_text }}"
+        cases:
+          - id: default
+            variables:
+              example_var: "This is an example variable"
+            o_connection: 'set_variables'
+
+      - id: set_variables
+        type: set_vars
+        variables:
+          set:
+            new_variable: "This is a new variable {{ route.client_text }} {{ route.example_var }}"
+            second_variable: "{{ flow.variable_1 }}"
+        o_connection: 'send_new_variable'
+
+      - id: send_new_variable
+        type: message
+        text: "{{ route.new_variable }}"
+        o_connection: 'farewell_message'
+
+      - id: error_message
+        type: message
+        text: "An error occurred in the subroutine"
+        o_connection: 'farewell_message'
+
+      - id: check_subroutine
+        type: subroutine
+        go_sub: http_subroutine
+        o_connection: send_sub_message
+
+      - id: http_subroutine
+        type: http_request
+        method: 'GET'
+        url: 'https://api.imgflip.com/get_memes'
+        variables:
+          memes: 'data.memes'
+        cases:
+          - id: 200
+            o_connection: null
+          - id: default
+            o_connection: 'error_message'
+
+      - id: send_sub_message
+        type: message
+        text: Hola la subrutina termino
+
+      - id: calification_assistant
+        type: gpt_assistant
+        assistant_id: "asisstent_id"
+        api_key: "abc123"
+        variable: assistant_response
+        initial_info: "Esteban, Galvis"
+        validation: >-
+          {%- if route.assistant_response is mapping -%}True{% else %}False{% endif %}
+        group_messages_timeout: 5
+        inactivity_options:
+          chat_timeout: 500 #seconds
+          warning_message: "Por favor, califica el servicio o el chat se cerrará por inactividad 😱"
+          time_between_attempts: 250 #seconds
+          attempts: 3
+        middlewares:
+          - tstt_middleware
+        cases:
+          - id: true
+            o_connection: m1
+          - id: timeout
+            o_connection: m4
+
+      - id: m1
+        type: message
+        text: |
+          Gracias por calificar el servicio 😊
+
+          respuesta del asistente: {{ route.assistant_response }}
+
+      - id: m4
+        type: message
+        text: "El chat ha sido cerrado por inactividad, gracias por contactarnos. 😁"
+
+      - id: location_node_input
+        type: input
+        text: "Send a location to get the data"
+        variable: location
+        input_type: "m.location"
+        cases:
+          - id: true
+            o_connection: location_node_output
+          - id: default
+            o_connection: location_node_input
+
+      - id: location_node_output
+        type: message
+        text: "The location is {{ route.location }}"
+        o_connection: start
+
+      - id: get_date_v3
+        type: input
+        text: "Send a time expression to get a date: format dd-mm-yyyy"
+        variable: new_date
+        validation: "{{  match('^(?:[0-9][0-9])?[0-9][0-9]-[0-3][0-9]-[0-3][0-9]$', route.new_date) }}"
+        cases:
+          - id: True
+            o_connection: set_date
+          - id: default
+            o_connection: get_date_v3
+
+      - id: set_date
+        type: set_vars
+        variables:
+          set:
+            validated_date:  >
+              {%- set now_date = '%Y-%m-%d' | strftime -%}
+              {%- set new_date = route.new_date -%}
+              {{ ((now_date | to_datetime('%Y-%m-%d')) - (new_date | to_datetime('%Y-%m-%d'))).days }}
+        o_connection: validate_date
+
+      - id: validate_date
+        type: switch
+        cases:
+          - case: |
+              {%- if route.validated_date | int < 30 -%}
+                True
+              {%- else -%}
+                False
+              {%- endif -%}
+            o_connection: date_valid
+          - id: default
+            o_connection: date_invalid
+
+      - id: date_valid
+        type: message
+        text: "The date is valid"
+        o_connection: start
+
+      - id: date_invalid
+        type: message
+        text: "The date is invalid"
+        o_connection: start
+
+      - id: empty_message
+        type: message
+        text: ""
+        o_connection: start
+
+      - id: 'http_acd'
+        type: 'http_request'
+        method: 'POST'
+        url: http://acd-as:29601/provision/v1/cmd/acd
+        json:
+          customer_room_id: '{{route.customer_room_id}}'
+          destination: '!mecvMBiHLULHQKOWjU:darknet'
+          joined_message: "{{ route.joined_message }}"
+        middleware: "acd"
+        cases:
+          - id: default
+            o_connection: empty_message
+
+      - id: 'set_jinja_variable'
+        type: 'set_vars'
+        variables:
+          set:
+            item:
+              name: 'item'
+              products:
+                - name: 'product1'
+                  price: 1000
+                - name: 'product2'
+                  price: 2000
+        o_connection: 'http_request_jinja'
+
+      - id: 'http_request_jinja'
+        type: 'http_request'
+        method: 'POST'
+        url: 'https://ef9d-186-117-144-177.ngrok-free.app/jinja2/example'
+        json:
+          name: "{{ route.item.name }}"
+          products: "{{ route.item.products | tojson }}"
+        variables:
+          info: 'item'
+        cases:
+          - id: 200
+            o_connection: 'print_response'
+          - id: default
+            o_connection: 'farewell_message'
+
+      - id: 'print_response'
+        type: 'message'
+        text: "{{ route.info }}"
+        o_connection: 'farewell_message'
+
+      - id: send_form
+        type: form
+        template_name: 'new_form'
+        language: es
+        variable: form_response
+        validation_fail:
+          message: "Por favor, completa todos los campos"
+          attempts: 3
+        inactivity_options:
+          chat_timeout: 20 #seconds
+          warning_message: "Por favor, completa el formulario o el chat se cerrará por inactividad 😱"
+          time_between_attempts: 10 #seconds
+          attempts: 3
+        cases:
+          - id: submitted
+            o_connection: submitted
+          - id: timeout
+            o_connection: timeout
+          - id: attempt_exceeded
+            o_connection: max_attempts
+
+      - id: submitted
+        type: message
+        text: "Formulario enviado"
+        o_connection: start
+
+      - id: timeout
+        type: message
+        text: "El formulario ha sido cerrado por inactividad"
+        o_connection: start
+
+      - id: max_attempts
+        type: message
+        text: "Has excedido el número de intentos"
+        o_connection: start

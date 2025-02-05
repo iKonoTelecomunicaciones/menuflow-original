@@ -1,24 +1,23 @@
 middlewares:
   - id: api_jwt
     type: jwt
-    url: "https://webapinet.userfoo.com/api"
-    token_type: 'Bearer'
+    url: 'https://webapinet.userfoo.com/api'
+    token_type: Bearer
     auth:
       method: POST
       token_path: /login/authenticate
       headers:
-          content-type: application/json
+        content-type: application/json
       data:
-          username: "foo"
-          password: "secretfoo"
+        username: foo
+        password: secretfoo
       variables:
-          token: token
+        token: xyz123
     general:
       headers:
-          content-type: application/json
-
+        content-type: application/json
   - id: api_basic
-    url: "https://dev.foo.com.co/customers_list"
+    url: 'https://dev.foo.com.co/customers_list'
     type: basic
     auth:
       basic_auth:
@@ -28,7 +27,70 @@ middlewares:
       headers:
         content-type: application/x-www-form-urlencoded
 
-# E-mail servers that you can use in the e-mail nodes
+  - id: irm_middleware
+    type: irm
+    method: POST
+    url: 'https://ikonomind.ikono.net.co/v1/irm/recognize_image'
+    prompt: >
+      Extract key information from discount coupon photo and outputs the data in
+      JSON format with the following structure: ```json {
+          "promo_code": "Extracted promo code"
+      } ``` Instructions: Extract the promo code.
+    variables:
+      promo_code: promo_code
+    headers:
+      Client-token: xyz123
+
+  - id: llm_middleware
+    type: llm
+    method: POST
+    url: 'https://ikonomind.ikono.net.co/v1/llm/generate_text'
+    model: 'ft:gpt-3.5-turbo-0613'
+    prompt: >
+      Given a time expression and current date, give me a date in the following
+      format: DD/MM/YYYY, return only the date format
+    provider: openai
+    args:
+      current_date: '{{ utcnow().strftime(''%d/%m/%Y'') }}'
+    variables:
+      appointment_date: text
+    headers:
+      Client-token: xyz123
+
+  - id: ttm_middleware
+    type: ttm
+    method: POST
+    url: 'https://ikonomind.ikono.net.co/v1/ttt/translate'
+    source_language: es
+    target_language: en
+    provider: azure
+    variables:
+      translated_text: text
+    headers:
+      Client-token: xyz123
+
+  - id: tstt_middleware
+    type: asr
+    method: POST
+    url: 'https://ikonomind.ikono.net.co/v1/tstt/translate'
+    source_language: es-MX
+    target_languages: es
+    provider: azure
+    variables:
+      recogniced_text: result.es
+    headers:
+      Client-token: xyz123
+
+  - id: asr_middleware
+    type: asr
+    method: POST
+    url: 'https://ikmind.ikono.net.co/v1/asr/recognize/es-MX'
+    provider: azure
+    variables:
+      recogniced_text: text
+    headers:
+      Client-token: xyz123
+
 email_servers:
   - server_id: sample-server-1
     host: smtp.server1.com

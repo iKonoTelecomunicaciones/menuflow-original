@@ -1,0 +1,170 @@
+menu:
+    flow_variables:
+      # API
+      api:
+        endpoints:
+          optin: "https://api-testing.ikono.net.co/v2/opt_in"
+          optin_v1: "https://api-testing.ikono.net.co/v1/opt_in"
+          customer: "https://api-testing.ikono.net.co/v2/customers"
+          customer_v1: "https://api-testing.ikono.net.co/v1/customers"
+    nodes:
+      - id: start
+        type: 'input'
+        text: 'Please enter you identification number 1️⃣'
+        variable: 'num_doc'
+        validation: '{% set aux = num_doc | string %}{% if aux.isdigit() %}True{%else%}False{% endif %}'
+        inactivity_options:
+          chat_timeout: 60
+          warning_message: 'Please select a valid option or the chat will be closed due to inactivity 😱'
+          time_between_attempts: 30
+          attempts: 3
+        cases:
+          - id: true
+            o_connection: 'get_client'
+          - id: 'default'
+            o_connection: 'start'
+          - id: 'timeout'
+            o_connection: 'closing_message'
+
+      - id: get_client
+        type: http_request
+        method: GET
+        url: "{{ api.endpoints.customer }}/{{ num_doc }}?search=identifier"
+        middleware: "omni_api"
+        variables:
+          first_name: first_name
+          last_name: last_name
+
+        cases:
+          - id: 200
+            o_connection: menu_start
+          - id: default
+            o_connection: crear_cliente
+
+      - id: menu_start
+        type: input
+        text: |
+          Welcome {{ first_name }} {{ last_name }} to iKonoTel's medical service.<br><br>
+          Please select one of the next options:
+
+          **1.** Dentist appointments 🦷<br>
+          **2.** General doctor appointments 🩺<br>
+          **0.** Finish
+
+        variable: opt
+        validation: "{{ opt }}"
+        cases:
+          - id: 1
+            o_connection: get_physician
+            variables:
+              medical_service: Dentistry
+          - id: 2
+            o_connection: get_physician
+            variables:
+              medical_service: General medicine
+          - id: 0
+            o_connection: farewell_message
+          - id: default
+            o_connection: start
+          - id: timeout
+            o_connection: closing_message
+
+      - id: 'get_physician'
+        type: 'input'
+        text: |
+          Please select the physician who will treat you 🩺<br>
+
+          **1.** John Smith<br>
+          **2.** Emily Davis<br>
+          **3.** Michael Johnson<br>
+          **0.** Go back
+
+        variable: 'opt'
+        validation: '{{ opt }}'
+        cases:
+          - id: 1
+            o_connection: 'get_dates'
+            variables:
+              physician: John Smith
+          - id: 2
+            o_connection: 'get_dates'
+            variables:
+              physician: Emily Davis
+          - id: 3
+            o_connection: 'get_dates'
+            variables:
+              physician: Michael Johnson
+          - id: 0
+            o_connection: 'menu_start'
+          - id: 'default'
+            o_connection: 'get_physician'
+          - id: 'timeout'
+            o_connection: 'timeout_node'
+
+      - id: 'get_dates'
+        type: 'switch'
+        validation: '{% if opt %}True{% endif %}'
+        cases:
+          - id: true
+            o_connection: 'appointment_dates'
+            variables:
+              appointment_dates_list: >
+                {%- set random_dates = [] -%}
+                {%- for n in range(5) %}
+                  {%- set month = range(10, 12)|random %}
+                  {%- set day = range(1, 30)|random %}
+                  {%- set year = range(2023, 2024)|random %}
+                  {%- set hour = range(0, 23)|random %}
+                  {%- set minute = range(0, 59)|random %}
+                  {%- set random_date = day ~ '/' ~ month ~ '/' ~ year ~ ' ' ~ hour ~ ':' ~ minute %}
+                  {%- set _ = random_dates.append(random_date) %}
+                {%- endfor -%}
+                {{ random_dates }}
+          - id: 'default'
+            o_connection: 'farewell_message'
+
+      - id: 'appointment_dates'
+        type: 'input'
+        text: |
+          Please select the date of your appointment:<br><br>
+          {%- set appintment_date_str = appointment_dates_list|replace("&#39;", '"') -%}
+          {%- set appointment_dates = appintment_date_str | from_json -%}
+          {%- for date in appointment_dates -%}
+            **{{ loop.index }}:** {{ date }}<br>
+          {%- endfor -%}
+        variable: 'date_opt'
+        validation: '{% set aux =  date_opt | string %}{% if aux.isdigit() %}True{% endif %}'
+        inactivity_options:
+          chat_timeout: 60
+          warning_message: 'Please select a valid option or the chat will be closed due to inactivity 😱'
+          time_between_attempts: 30
+          attempts: 3
+        cases:
+          - id: true
+            o_connection: 'appointment_summary'
+          - id: 'default'
+            o_connection: 'appointment_dates'
+          - id: 'timeout'
+            o_connection: 'closing_message'
+
+      - id: 'appointment_summary'
+        type: 'message'
+        message_type: 'm.text'
+        text: >
+          Appointment summary:<br><br>
+
+          Your appointment for {{ medical_service }} was saved:<br><br>
+          Physician: {{ physician }}<br>
+          {%- set appintment_date_str = appointment_dates_list|replace("&#39;", '"') -%}
+          {%- set appointment_dates = appintment_date_str | from_json -%}
+          Date: {{ appointment_dates[date_opt-1] }}<br>
+
+          Have a good day.
+
+      - id: farewell_message
+        type: message
+        text: "Bye. Have a nice day 😄"
+
+      - id: 'closing_message'
+        type: "message"
+        text: "The chat has been closed due to inactivity, thank you for reaching out to us. 😁"
